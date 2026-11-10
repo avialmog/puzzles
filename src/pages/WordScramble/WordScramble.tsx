@@ -13,14 +13,15 @@ function newRound(excludeWord?: string): { entry: WordEntry; scrambled: string }
 function WordScramble() {
   const [round, setRound] = useState(() => newRound())
   const [guess, setGuess] = useState('')
-  const [status, setStatus] = useState<'idle' | 'correct' | 'incorrect'>('idle')
+  const [status, setStatus] = useState<'idle' | 'correct' | 'incorrect' | 'revealed'>('idle')
   const [showHint, setShowHint] = useState(false)
   const [startedAt] = useState(() => performance.now())
   const [summary, setSummary] = useState(() => getSummary('wordScramble'))
+  const locked = status === 'correct' || status === 'revealed'
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (status === 'correct') return
+    if (locked) return
 
     if (guess.trim().toUpperCase() === round.entry.word) {
       const elapsedMs = Math.round(performance.now() - startedAt)
@@ -30,6 +31,11 @@ function WordScramble() {
     } else {
       setStatus('incorrect')
     }
+  }
+
+  function handleSolve() {
+    setGuess(round.entry.word)
+    setStatus('revealed')
   }
 
   function handleNext() {
@@ -63,9 +69,9 @@ function WordScramble() {
           onChange={(e) => setGuess(e.target.value)}
           placeholder="Your guess"
           autoFocus
-          disabled={status === 'correct'}
+          disabled={locked}
         />
-        <button type="submit" className={styles.submit} disabled={status === 'correct'}>
+        <button type="submit" className={styles.submit} disabled={locked}>
           Check
         </button>
       </form>
@@ -73,9 +79,16 @@ function WordScramble() {
       <div className={`${styles.feedback} ${status === 'correct' ? styles.correct : status === 'incorrect' ? styles.incorrect : ''}`}>
         {status === 'correct' && 'Correct!'}
         {status === 'incorrect' && 'Not quite — try again.'}
+        {status === 'revealed' && `Answer: ${round.entry.word}`}
       </div>
 
-      {status === 'correct' && (
+      {!locked && (
+        <button type="button" className={styles.hintButton} onClick={handleSolve}>
+          Solve
+        </button>
+      )}
+
+      {locked && (
         <button type="button" className={styles.nextButton} onClick={handleNext}>
           Next word →
         </button>

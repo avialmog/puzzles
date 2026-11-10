@@ -4,6 +4,7 @@ import { generateWordSearch } from '../../domain/wordSearch/generator'
 import { findMatchingWord, lineCells } from '../../domain/wordSearch/selection'
 import type { CellPos } from '../../domain/wordSearch/selection'
 import type { WordSearchPuzzle } from '../../domain/wordSearch/types'
+import { wordCells } from '../../domain/wordSearch/types'
 import { CATEGORIES } from '../../domain/wordSearch/wordList'
 import { getSummary, recordResult } from '../../shared/progress/progressStore'
 import styles from './WordSearch.module.css'
@@ -88,6 +89,15 @@ function WordSearch() {
     setDragEnd(null)
   }
 
+  function handleSolve() {
+    const nextCells = new Set<string>()
+    for (const p of puzzle.placed) {
+      for (const [r, c] of wordCells(p)) nextCells.add(cellKey(r, c))
+    }
+    setFoundWords(new Set(puzzle.placed.map((p) => p.word)))
+    setFoundCells(nextCells)
+  }
+
   return (
     <div className={styles.page}>
       <Link to="/" className={styles.back}>
@@ -155,6 +165,9 @@ function WordSearch() {
 
       <button type="button" className={styles.newButton} onClick={() => startNewPuzzle(category)}>
         New puzzle
+      </button>
+      <button type="button" className={styles.newButton} onClick={handleSolve} disabled={won}>
+        Solve
       </button>
 
       <p className={styles.stats}>

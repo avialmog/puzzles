@@ -34,6 +34,10 @@
   text-transform: capitalize;
 }
 
+.plainLabel {
+  text-transform: none;
+}
+
 .diffButton.active {
   border-color: var(--accent);
   color: var(--accent);

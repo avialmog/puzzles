@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { generatePuzzle } from '../../domain/sudoku/generator'
 import type { Difficulty, Grid, Puzzle } from '../../domain/sudoku/types'
 import { cloneGrid, hashClues } from '../../domain/sudoku/types'
@@ -8,6 +8,10 @@ import styles from './Sudoku.module.css'
 
 const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard']
 const MAX_REGENERATE_ATTEMPTS = 3
+
+interface LocationState {
+  scannedPuzzle?: Puzzle
+}
 
 function boxIndex(r: number, c: number): number {
   return Math.floor(r / 3) * 3 + Math.floor(c / 3)
@@ -58,16 +62,21 @@ function generateUnique(difficulty: Difficulty, lastHash: string | null): Puzzle
 }
 
 function Sudoku() {
-  const [difficulty, setDifficulty] = useState<Difficulty>('easy')
+  const location = useLocation()
+  const scannedPuzzle = (location.state as LocationState | undefined)?.scannedPuzzle
+
+  const [difficulty, setDifficulty] = useState<Difficulty | 'scanned'>(scannedPuzzle ? 'scanned' : 'easy')
   const [lastHash, setLastHash] = useState<string | null>(null)
-  const [puzzle, setPuzzle] = useState<Puzzle>(() => generateUnique('easy', null))
+  const [puzzle, setPuzzle] = useState<Puzzle>(() => scannedPuzzle ?? generateUnique('easy', null))
   const [grid, setGrid] = useState<Grid>(() => cloneGrid(puzzle.clues))
   const [selected, setSelected] = useState<{ r: number; c: number } | null>(null)
   const [startedAt, setStartedAt] = useState(() => performance.now())
   const [won, setWon] = useState(false)
+  const [revealed, setRevealed] = useState(false)
   const [summary, setSummary] = useState(() => getSummary('sudoku'))
 
   const conflicts = useMemo(() => findConflicts(grid), [grid])
+  const locked = won || revealed
 
   function startNewPuzzle(nextDifficulty: Difficulty) {
     const next = generateUnique(nextDifficulty, lastHash)
@@ -77,6 +86,7 @@ function Sudoku() {
     setSelected(null)
     setStartedAt(performance.now())
     setWon(false)
+    setRevealed(false)
   }
 
   function handleDifficultyChange(next: Difficulty) {
@@ -85,12 +95,12 @@ function Sudoku() {
   }
 
   function handleCellClick(r: number, c: number) {
-    if (puzzle.clues[r][c] !== 0 || won) return
+    if (puzzle.clues[r][c] !== 0 || locked) return
     setSelected({ r, c })
   }
 
   function placeDigit(d: number) {
-    if (!selected || won) return
+    if (!selected || locked) return
     const { r, c } = selected
     if (puzzle.clues[r][c] !== 0) return
 
@@ -104,6 +114,12 @@ function Sudoku() {
       setSummary(getSummary('sudoku'))
       setWon(true)
     }
+  }
+
+  function handleSolve() {
+    setGrid(cloneGrid(puzzle.solution))
+    setSelected(null)
+    setRevealed(true)
   }
 
   return (
@@ -127,7 +143,7 @@ function Sudoku() {
       </div>
 
       <div className={`${styles.status} ${won ? styles.won : ''}`}>
-        {won ? 'Solved!' : `${puzzle.clueCount} clues`}
+        {won ? 'Solved!' : revealed ? 'Solution revealed' : `${puzzle.clueCount} clues`}
       </div>
 
       <div className={styles.grid}>
@@ -172,9 +188,17 @@ function Sudoku() {
         </button>
       </div>
 
-      <button type="button" className={styles.diffButton} onClick={() => startNewPuzzle(difficulty)}>
-        New puzzle
-      </button>
+      <div className={styles.toolbar}>
+        <button type="button" className={styles.diffButton} onClick={() => startNewPuzzle(difficulty === 'scanned' ? 'easy' : difficulty)}>
+          New puzzle
+        </button>
+        <button type="button" className={styles.diffButton} onClick={handleSolve} disabled={locked}>
+          Solve
+        </button>
+        <Link to="/sudoku/scan" className={`${styles.diffButton} ${styles.plainLabel}`}>
+          Scan a puzzle
+        </Link>
+      </div>
 
       <p className={styles.stats}>
         Solved: {summary.completedCount} · Streak: {summary.currentStreak}

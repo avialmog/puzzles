@@ -1,0 +1,127 @@
+.page {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 32px 16px 120px;
+  text-align: center;
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 16px;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.back:hover {
+  color: var(--accent);
+}
+
+.hint {
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.fileLabel {
+  display: inline-block;
+  padding: 12px 24px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.fileLabel:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.fileInput {
+  display: none;
+}
+
+.canvasWrap {
+  display: inline-block;
+  position: relative;
+  margin: 16px 0;
+  touch-action: none;
+}
+
+.canvas {
+  border: 1px solid var(--border);
+  display: block;
+  max-width: 100%;
+  cursor: crosshair;
+}
+
+.toolbar {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.button {
+  padding: 10px 20px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.button:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.primary {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-color: var(--accent);
+}
+
+.progressBarTrack {
+  width: 100%;
+  max-width: 400px;
+  height: 10px;
+  margin: 16px auto;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.15s ease;
+}
+
+.progressLabel {
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.errorBox {
+  color: #d1453b;
+  margin: 16px 0;
+}
+
+.validationBox {
+  margin: 16px 0;
+  color: var(--text-muted);
+}
+
+.validationBox.warn {
+  color: #b8860b;
+}
+
+.validationBox.fail {
+  color: #d1453b;
+}
