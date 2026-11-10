@@ -1,3 +1,9 @@
+.scanCluesButton {
+  display: inline-block;
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+
 .sizeRow {
   display: flex;
   align-items: center;
@@ -22,6 +28,9 @@
   margin: 16px auto;
   border: 2px solid var(--text);
   width: fit-content;
+  max-width: 100%;
+  overflow-x: auto;
+  direction: ltr;
 }
 
 .cwCell {
@@ -76,7 +85,7 @@
 }
 
 .cluesTextarea {
-  width: 320px;
+  width: min(320px, 100%);
   min-height: 280px;
   padding: 10px;
   border: 1px solid var(--border);

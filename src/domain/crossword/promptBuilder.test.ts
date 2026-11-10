@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { buildCrosswordPrompt } from './promptBuilder'
-import type { SolveCrosswordRequest } from './types'
+import type { SolveCluesRequest } from './types'
 
 // . . #        1 2 #
 // . . .   -->  3 . 4     (numbers are the derived slot-start positions)
 // # . .        # 5 .
-const request: SolveCrosswordRequest = {
+const request: SolveCluesRequest = {
+  mode: 'clues',
   rows: 3,
   cols: 3,
   black: [
@@ -14,14 +15,14 @@ const request: SolveCrosswordRequest = {
     [true, false, false],
   ],
   across: [
-    { number: 1, length: 2, clue: 'Feline pet' },
-    { number: 3, length: 3, clue: 'Opposite of out' },
-    { number: 5, length: 2, clue: 'Afternoon nap' },
+    { number: 1, length: 2, clue: 'Feline pet', row: 0, col: 0 },
+    { number: 3, length: 3, clue: 'Opposite of out', row: 1, col: 0 },
+    { number: 5, length: 2, clue: 'Afternoon nap', row: 2, col: 1 },
   ],
   down: [
-    { number: 1, length: 2, clue: 'Automobile' },
-    { number: 2, length: 3, clue: 'Mythical giant' },
-    { number: 4, length: 2, clue: 'Beverage, briefly' },
+    { number: 1, length: 2, clue: 'Automobile', row: 0, col: 0 },
+    { number: 2, length: 3, clue: 'Mythical giant', row: 0, col: 1 },
+    { number: 4, length: 2, clue: 'Beverage, briefly', row: 1, col: 2 },
   ],
 }
 

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { createWorker, PSM } from 'tesseract.js'
 import {
   cellBounds,
@@ -12,6 +13,7 @@ import { imageDataToPixelBuffer, pixelBufferToCanvas, upscaleCanvas } from '../.
 import { countSolutions, solveOne } from '../../domain/sudoku/solver'
 import type { Grid, Puzzle } from '../../domain/sudoku/types'
 import { emptyGrid } from '../../domain/sudoku/types'
+import BackLink from '../../shared/nav/BackLink'
 import sudokuStyles from '../Sudoku/Sudoku.module.css'
 import styles from '../../shared/scan/ScanUpload.module.css'
 
@@ -33,6 +35,7 @@ function countClues(grid: Grid): number {
 }
 
 function ScanSudoku() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const imageRef = useRef<HTMLImageElement | null>(null)
@@ -216,16 +219,14 @@ function ScanSudoku() {
 
   return (
     <div className={styles.page}>
-      <Link to="/sudoku" className={styles.back}>
-        ← Sudoku
-      </Link>
-      <h1>Scan a Puzzle</h1>
+      <BackLink to="/sudoku" label={t('sudoku.title')} />
+      <h1>{t('scanSudoku.title')}</h1>
 
       {status === 'upload' && (
         <>
-          <p className={styles.hint}>Take or upload a photo of a Sudoku grid.</p>
+          <p className={styles.hint}>{t('scanSudoku.uploadHint')}</p>
           <label className={styles.fileLabel}>
-            Choose photo
+            {t('common.choosePhoto')}
             <input
               type="file"
               accept="image/*"
@@ -239,18 +240,16 @@ function ScanSudoku() {
 
       {(status === 'corners' || status === 'scanning') && (
         <>
-          <p className={styles.hint}>
-            Tap the 4 corners of the grid in order: top-left, top-right, bottom-right, bottom-left. ({corners.length}/4)
-          </p>
+          <p className={styles.hint}>{t('common.cornersHint', { count: corners.length })}</p>
           <div className={styles.canvasWrap}>
             <canvas ref={canvasRef} className={styles.canvas} onClick={handleCanvasClick} />
           </div>
           <div className={styles.toolbar}>
             <button type="button" className={styles.button} onClick={handleUndoPoint} disabled={corners.length === 0 || status === 'scanning'}>
-              Undo point
+              {t('common.undoPoint')}
             </button>
             <label className={styles.button}>
-              New photo
+              {t('common.newPhoto')}
               <input type="file" accept="image/*" capture="environment" className={styles.fileInput} onChange={handleFileChange} />
             </label>
             <button
@@ -259,13 +258,13 @@ function ScanSudoku() {
               onClick={handleScan}
               disabled={corners.length !== 4 || status === 'scanning'}
             >
-              Scan
+              {t('common.scan')}
             </button>
           </div>
 
           {status === 'scanning' && (
             <>
-              <p className={styles.progressLabel}>Scanning cell {progress} / 81…</p>
+              <p className={styles.progressLabel}>{t('common.scanningProgress', { current: progress, total: 81 })}</p>
               <div className={styles.progressBarTrack}>
                 <div className={styles.progressBarFill} style={{ width: `${(progress / 81) * 100}%` }} />
               </div>
@@ -276,16 +275,16 @@ function ScanSudoku() {
 
       {status === 'error' && (
         <>
-          <p className={styles.errorBox}>Scan failed: {errorMessage}</p>
+          <p className={styles.errorBox}>{t('common.scanFailed', { message: errorMessage })}</p>
           <button type="button" className={styles.button} onClick={handleResetAll}>
-            Try again
+            {t('common.tryAgain')}
           </button>
         </>
       )}
 
       {status === 'review' && resultGrid && (
         <>
-          <p className={styles.hint}>Check the scanned digits and fix any mistakes before playing.</p>
+          <p className={styles.hint}>{t('scanSudoku.reviewHint')}</p>
 
           <div className={sudokuStyles.grid}>
             {resultGrid.map((row, r) =>
@@ -325,27 +324,23 @@ function ScanSudoku() {
           </div>
 
           {validation.kind === 'unsolvable' && (
-            <p className={`${styles.validationBox} ${styles.fail}`}>
-              This doesn't look solvable — please check the digits above and try again.
-            </p>
+            <p className={`${styles.validationBox} ${styles.fail}`}>{t('scanSudoku.validation.unsolvable')}</p>
           )}
           {validation.kind === 'multiple' && (
-            <p className={`${styles.validationBox} ${styles.warn}`}>
-              This has more than one valid solution — a digit may have been missed. You can still play it.
-            </p>
+            <p className={`${styles.validationBox} ${styles.warn}`}>{t('scanSudoku.validation.multiple')}</p>
           )}
-          {validation.kind === 'unique' && <p className={styles.validationBox}>Looks good — uniquely solvable!</p>}
+          {validation.kind === 'unique' && <p className={styles.validationBox}>{t('scanSudoku.validation.unique')}</p>}
 
           <div className={styles.toolbar}>
             <button type="button" className={styles.button} onClick={handleResetAll}>
-              Start over
+              {t('common.startOver')}
             </button>
             <button type="button" className={styles.button} onClick={handleValidate}>
-              Check
+              {t('common.check')}
             </button>
             {(validation.kind === 'unique' || validation.kind === 'multiple') && (
               <button type="button" className={`${styles.button} ${styles.primary}`} onClick={handlePlay}>
-                Play this puzzle
+                {t('common.playThisPuzzle')}
               </button>
             )}
           </div>

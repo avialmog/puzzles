@@ -1,0 +1,117 @@
+{
+  "app": {
+    "title": "Puzzles"
+  },
+  "common": {
+    "home": "Home",
+    "newPuzzle": "New puzzle",
+    "solve": "Solve",
+    "scanAPuzzle": "Scan a puzzle",
+    "startOver": "Start over",
+    "tryAgain": "Try again",
+    "scan": "Scan",
+    "undoPoint": "Undo point",
+    "newPhoto": "New photo",
+    "choosePhoto": "Choose photo",
+    "backToGrid": "Back to grid",
+    "continueToClues": "Continue to clues",
+    "check": "Check",
+    "playThisPuzzle": "Play this puzzle",
+    "scanAnother": "Scan another",
+    "solvingWithAi": "Solving with AI…",
+    "gridSize": "Grid size",
+    "cornersHint": "Tap the 4 corners of the grid in order: top-left, top-right, bottom-right, bottom-left. ({{count}}/4)",
+    "scanFailed": "Scan failed: {{message}}",
+    "solvedStreak": "Solved: {{solved}} · Streak: {{streak}}",
+    "scanningProgress": "Scanning cell {{current}} / {{total}}…",
+    "across": "Across",
+    "down": "Down",
+    "solved": "Solved!"
+  },
+  "home": {
+    "subtitle": "Pick a puzzle to play",
+    "solved": "Solved: {{count}}",
+    "modes": {
+      "wordScramble": { "title": "Word Scramble", "desc": "Unscramble the letters to find the word" },
+      "sudoku": { "title": "Sudoku", "desc": "Classic number logic puzzle" },
+      "wordSearch": { "title": "Word Search", "desc": "Find hidden words in a grid of letters" },
+      "crossword": { "title": "Crossword", "desc": "Scan a crossword (any style - regular, Italian, challenge) and solve the clues with AI" },
+      "arrowCrossword": { "title": "Arrow Crossword", "desc": "Scan a Scandinavian-style crossword with clues embedded in the grid" },
+      "codeword": { "title": "Codeword", "desc": "Scan a number-substitution cipher crossword and solve it with AI" }
+    }
+  },
+  "sudoku": {
+    "title": "Sudoku",
+    "difficulty": { "easy": "Easy", "medium": "Medium", "hard": "Hard" },
+    "status": { "solved": "Solved!", "revealed": "Solution revealed", "clues": "{{count}} clues" }
+  },
+  "wordScramble": {
+    "title": "Word Scramble",
+    "category": "Category: {{category}}",
+    "showHint": "Show hint",
+    "hideHint": "Hide hint",
+    "guessPlaceholder": "Your guess",
+    "nextWord": "Next word",
+    "feedback": {
+      "correct": "Correct!",
+      "incorrect": "Not quite — try again.",
+      "revealed": "Answer: {{word}}"
+    }
+  },
+  "wordSearch": {
+    "title": "Word Search",
+    "categories": { "Animals": "Animals", "Space": "Space", "Kitchen": "Kitchen" },
+    "find": "Find:",
+    "allFound": "All words found!",
+    "foundCount": "{{found}} / {{total}} found"
+  },
+  "scanWordSearch": {
+    "title": "Scan a Word Search",
+    "uploadHint": "Take or upload a photo of a word search grid.",
+    "reviewHint": "Check the scanned letters and fix any mistakes.",
+    "solvedHint": "Found words are highlighted below.",
+    "wordsPlaceholder": "Enter the words to find, one per line (or comma-separated)",
+    "foundHeading": "Found ({{count}})",
+    "notFoundHeading": "Not found ({{count}})",
+    "notFoundHint": "Not-found words usually mean a misread letter — go back and fix the grid, then solve again.",
+    "editLetters": "Edit letters"
+  },
+  "scanSudoku": {
+    "title": "Scan a Puzzle",
+    "uploadHint": "Take or upload a photo of a Sudoku grid.",
+    "reviewHint": "Check the scanned digits and fix any mistakes before playing.",
+    "validation": {
+      "unsolvable": "This doesn't look solvable — please check the digits above and try again.",
+      "multiple": "This has more than one valid solution — a digit may have been missed. You can still play it.",
+      "unique": "Looks good — uniquely solvable!"
+    }
+  },
+  "scanCrossword": {
+    "title": "Scan a Crossword",
+    "uploadHint": "Take or upload a photo of a crossword grid.",
+    "reviewHint": "Tap any cell to toggle it between black and white, then continue.",
+    "cluesHint": "Paste or type each clue after its number, or scan a photo of the printed clue list below. The (length) hints are prefilled.",
+    "missingClues": "Missing clue text for: {{list}}",
+    "scanClueButton": "Scan clue photo",
+    "scanningClues": "Reading clues…"
+  },
+  "scanArrowCrossword": {
+    "title": "Scan an Arrow Crossword",
+    "uploadHint": "Take or upload a photo of a Scandinavian-style (arrow) crossword.",
+    "reviewHint": "Tap any cell to toggle it between a clue cell (shaded) and a letter cell, then continue.",
+    "cluesHint": "Tap a shaded clue cell, then type its across and/or down clue text.",
+    "acrossClueLabel": "Across clue (answer goes to the right)",
+    "downClueLabel": "Down clue (answer goes below)",
+    "missingClues": "{{count}} clue cell(s) still need text."
+  },
+  "scanCodeword": {
+    "title": "Scan a Codeword",
+    "uploadHint": "Take or upload a photo of a codeword (cipher) puzzle grid.",
+    "reviewHint": "Tap a cell to fix a misread number or toggle it black/white.",
+    "markWhite": "Mark as white",
+    "markBlack": "Mark as black",
+    "numberInCell": "Number in this cell",
+    "continueToKnown": "Continue to known letters",
+    "knownLettersHint": "If the puzzle gives any starter letters (e.g. \"5 = T\"), enter them here. Leave the rest blank."
+  }
+}

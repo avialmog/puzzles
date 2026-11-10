@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { generateWordSearch } from '../../domain/wordSearch/generator'
 import { findMatchingWord, lineCells } from '../../domain/wordSearch/selection'
 import type { CellPos } from '../../domain/wordSearch/selection'
@@ -7,6 +8,7 @@ import type { WordSearchPuzzle } from '../../domain/wordSearch/types'
 import { wordCells } from '../../domain/wordSearch/types'
 import { CATEGORIES } from '../../domain/wordSearch/wordList'
 import { getSummary, recordResult } from '../../shared/progress/progressStore'
+import BackLink from '../../shared/nav/BackLink'
 import styles from './WordSearch.module.css'
 
 function cellKey(r: number, c: number): string {
@@ -14,6 +16,7 @@ function cellKey(r: number, c: number): string {
 }
 
 function WordSearch() {
+  const { t } = useTranslation()
   const [category, setCategory] = useState(CATEGORIES[0].name)
   const [puzzle, setPuzzle] = useState<WordSearchPuzzle>(() => generateWordSearch(CATEGORIES[0].name))
   const [foundWords, setFoundWords] = useState<Set<string>>(new Set())
@@ -100,10 +103,8 @@ function WordSearch() {
 
   return (
     <div className={styles.page}>
-      <Link to="/" className={styles.back}>
-        ← Home
-      </Link>
-      <h1>Word Search</h1>
+      <BackLink to="/" label={t('common.home')} />
+      <h1>{t('wordSearch.title')}</h1>
 
       <div className={styles.toolbar}>
         {CATEGORIES.map((c) => (
@@ -113,7 +114,7 @@ function WordSearch() {
             className={`${styles.catButton} ${c.name === category ? styles.active : ''}`}
             onClick={() => startNewPuzzle(c.name)}
           >
-            {c.name}
+            {t(`wordSearch.categories.${c.name}`)}
           </button>
         ))}
       </div>
@@ -148,7 +149,7 @@ function WordSearch() {
         </div>
 
         <div className={styles.wordList}>
-          <h3>Find:</h3>
+          <h3>{t('wordSearch.find')}</h3>
           <ul>
             {puzzle.placed.map((p) => (
               <li key={p.word} className={foundWords.has(p.word) ? styles.found : ''}>
@@ -160,22 +161,20 @@ function WordSearch() {
       </div>
 
       <div className={`${styles.status} ${won ? styles.won : ''}`}>
-        {won ? 'All words found!' : `${foundWords.size} / ${puzzle.placed.length} found`}
+        {won ? t('wordSearch.allFound') : t('wordSearch.foundCount', { found: foundWords.size, total: puzzle.placed.length })}
       </div>
 
       <button type="button" className={styles.newButton} onClick={() => startNewPuzzle(category)}>
-        New puzzle
+        {t('common.newPuzzle')}
       </button>
       <button type="button" className={styles.newButton} onClick={handleSolve} disabled={won}>
-        Solve
+        {t('common.solve')}
       </button>
       <Link to="/word-search/scan" className={styles.newButton}>
-        Scan a puzzle
+        {t('common.scanAPuzzle')}
       </Link>
 
-      <p className={styles.stats}>
-        Solved: {summary.completedCount} · Streak: {summary.currentStreak}
-      </p>
+      <p className={styles.stats}>{t('common.solvedStreak', { solved: summary.completedCount, streak: summary.currentStreak })}</p>
     </div>
   )
 }

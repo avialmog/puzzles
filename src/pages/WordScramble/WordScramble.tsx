@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { pickRandomEntry, scrambleWord } from '../../domain/wordScramble/shuffle'
 import type { WordEntry } from '../../domain/wordScramble/types'
 import { getSummary, recordResult } from '../../shared/progress/progressStore'
+import BackLink from '../../shared/nav/BackLink'
 import styles from './WordScramble.module.css'
 
 function newRound(excludeWord?: string): { entry: WordEntry; scrambled: string } {
@@ -11,6 +12,7 @@ function newRound(excludeWord?: string): { entry: WordEntry; scrambled: string }
 }
 
 function WordScramble() {
+  const { t, i18n } = useTranslation()
   const [round, setRound] = useState(() => newRound())
   const [guess, setGuess] = useState('')
   const [status, setStatus] = useState<'idle' | 'correct' | 'incorrect' | 'revealed'>('idle')
@@ -45,19 +47,19 @@ function WordScramble() {
     setShowHint(false)
   }
 
+  const nextArrow = i18n.dir() === 'rtl' ? '←' : '→'
+
   return (
     <div className={styles.page}>
-      <Link to="/" className={styles.back}>
-        ← Home
-      </Link>
-      <h1>Word Scramble</h1>
-      <p className={styles.category}>Category: {round.entry.category}</p>
+      <BackLink to="/" label={t('common.home')} />
+      <h1>{t('wordScramble.title')}</h1>
+      <p className={styles.category}>{t('wordScramble.category', { category: round.entry.category })}</p>
 
       <div className={styles.scrambled}>{round.scrambled}</div>
 
       <div className={styles.hintRow}>
         <button type="button" className={styles.hintButton} onClick={() => setShowHint((v) => !v)}>
-          {showHint ? 'Hide hint' : 'Show hint'}
+          {showHint ? t('wordScramble.hideHint') : t('wordScramble.showHint')}
         </button>
         {showHint && <p className={styles.hintText}>{round.entry.hint}</p>}
       </div>
@@ -67,36 +69,34 @@ function WordScramble() {
           className={styles.input}
           value={guess}
           onChange={(e) => setGuess(e.target.value)}
-          placeholder="Your guess"
+          placeholder={t('wordScramble.guessPlaceholder')}
           autoFocus
           disabled={locked}
         />
         <button type="submit" className={styles.submit} disabled={locked}>
-          Check
+          {t('common.check')}
         </button>
       </form>
 
       <div className={`${styles.feedback} ${status === 'correct' ? styles.correct : status === 'incorrect' ? styles.incorrect : ''}`}>
-        {status === 'correct' && 'Correct!'}
-        {status === 'incorrect' && 'Not quite — try again.'}
-        {status === 'revealed' && `Answer: ${round.entry.word}`}
+        {status === 'correct' && t('wordScramble.feedback.correct')}
+        {status === 'incorrect' && t('wordScramble.feedback.incorrect')}
+        {status === 'revealed' && t('wordScramble.feedback.revealed', { word: round.entry.word })}
       </div>
 
       {!locked && (
         <button type="button" className={styles.hintButton} onClick={handleSolve}>
-          Solve
+          {t('common.solve')}
         </button>
       )}
 
       {locked && (
         <button type="button" className={styles.nextButton} onClick={handleNext}>
-          Next word →
+          {t('wordScramble.nextWord')} {nextArrow}
         </button>
       )}
 
-      <p className={styles.stats}>
-        Solved: {summary.completedCount} · Streak: {summary.currentStreak}
-      </p>
+      <p className={styles.stats}>{t('common.solvedStreak', { solved: summary.completedCount, streak: summary.currentStreak })}</p>
     </div>
   )
 }

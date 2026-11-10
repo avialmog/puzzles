@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { generatePuzzle } from '../../domain/sudoku/generator'
 import type { Difficulty, Grid, Puzzle } from '../../domain/sudoku/types'
 import { cloneGrid, hashClues } from '../../domain/sudoku/types'
 import { getSummary, recordResult } from '../../shared/progress/progressStore'
+import BackLink from '../../shared/nav/BackLink'
 import styles from './Sudoku.module.css'
 
 const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard']
@@ -62,6 +64,7 @@ function generateUnique(difficulty: Difficulty, lastHash: string | null): Puzzle
 }
 
 function Sudoku() {
+  const { t } = useTranslation()
   const location = useLocation()
   const scannedPuzzle = (location.state as LocationState | undefined)?.scannedPuzzle
 
@@ -124,10 +127,8 @@ function Sudoku() {
 
   return (
     <div className={styles.page}>
-      <Link to="/" className={styles.back}>
-        ← Home
-      </Link>
-      <h1>Sudoku</h1>
+      <BackLink to="/" label={t('common.home')} />
+      <h1>{t('sudoku.title')}</h1>
 
       <div className={styles.toolbar}>
         {DIFFICULTIES.map((d) => (
@@ -137,13 +138,13 @@ function Sudoku() {
             className={`${styles.diffButton} ${d === difficulty ? styles.active : ''}`}
             onClick={() => handleDifficultyChange(d)}
           >
-            {d}
+            {t(`sudoku.difficulty.${d}`)}
           </button>
         ))}
       </div>
 
       <div className={`${styles.status} ${won ? styles.won : ''}`}>
-        {won ? 'Solved!' : revealed ? 'Solution revealed' : `${puzzle.clueCount} clues`}
+        {won ? t('sudoku.status.solved') : revealed ? t('sudoku.status.revealed') : t('sudoku.status.clues', { count: puzzle.clueCount })}
       </div>
 
       <div className={styles.grid}>
@@ -190,19 +191,17 @@ function Sudoku() {
 
       <div className={styles.toolbar}>
         <button type="button" className={styles.diffButton} onClick={() => startNewPuzzle(difficulty === 'scanned' ? 'easy' : difficulty)}>
-          New puzzle
+          {t('common.newPuzzle')}
         </button>
         <button type="button" className={styles.diffButton} onClick={handleSolve} disabled={locked}>
-          Solve
+          {t('common.solve')}
         </button>
         <Link to="/sudoku/scan" className={`${styles.diffButton} ${styles.plainLabel}`}>
-          Scan a puzzle
+          {t('common.scanAPuzzle')}
         </Link>
       </div>
 
-      <p className={styles.stats}>
-        Solved: {summary.completedCount} · Streak: {summary.currentStreak}
-      </p>
+      <p className={styles.stats}>{t('common.solvedStreak', { solved: summary.completedCount, streak: summary.currentStreak })}</p>
     </div>
   )
 }

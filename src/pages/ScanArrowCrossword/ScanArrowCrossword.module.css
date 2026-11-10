@@ -1,0 +1,131 @@
+.sizeRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.sizeInput {
+  width: 60px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  text-align: center;
+}
+
+.awGrid {
+  display: grid;
+  gap: 0;
+  margin: 16px auto;
+  border: 2px solid var(--text);
+  width: fit-content;
+  max-width: 100%;
+  overflow-x: auto;
+  direction: ltr;
+}
+
+.awCell {
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.awCell.clue {
+  background: var(--code-bg, #eee);
+  cursor: pointer;
+}
+
+.awCell.clue.selected {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.awCell.clue.filled {
+  color: var(--accent);
+}
+
+.awCell.letter {
+  cursor: default;
+}
+
+.editorBox {
+  max-width: 360px;
+  margin: 0 auto 16px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  text-align: left;
+}
+
+.editorBox label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.editorBox input {
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+}
+
+.missingClues {
+  color: #b8860b;
+  margin-bottom: 16px;
+}
+
+.answerList {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+  text-align: left;
+  margin-top: 16px;
+}
+
+.answerList h3 {
+  margin-bottom: 8px;
+}
+
+.answerList ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.answerList li {
+  padding: 2px 0;
+  font-size: 14px;
+}
+
+.spinner {
+  margin: 32px auto;
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

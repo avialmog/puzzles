@@ -171,3 +171,81 @@ export function inkRatio(buffer: PixelBuffer, threshold = 128, marginRatio = 0.1
 
   return total === 0 ? 0 : dark / total
 }
+
+/** Average "darkness" (255 - luminance) along each column (or row) of the buffer. */
+export function axisDarknessProfile(buffer: PixelBuffer, axis: 'row' | 'col'): number[] {
+  const length = axis === 'col' ? buffer.width : buffer.height
+  const other = axis === 'col' ? buffer.height : buffer.width
+  const profile = new Array(length).fill(0)
+
+  for (let i = 0; i < length; i++) {
+    let sum = 0
+    for (let j = 0; j < other; j++) {
+      const x = axis === 'col' ? i : j
+      const y = axis === 'col' ? j : i
+      const idx = (y * buffer.width + x) * 4
+      const luminance = 0.299 * buffer.data[idx] + 0.587 * buffer.data[idx + 1] + 0.114 * buffer.data[idx + 2]
+      sum += 255 - luminance
+    }
+    profile[i] = sum / other
+  }
+
+  return profile
+}
+
+/** How well a `size`-cell uniform grid's internal line positions line up with dark bands in `profile`. */
+function scoreCandidateSize(profile: number[], size: number): number {
+  const dim = profile.length
+  const cellPx = dim / size
+  let total = 0
+
+  for (let k = 1; k < size; k++) {
+    const pos = Math.round(k * cellPx)
+    let windowSum = 0
+    let windowCount = 0
+    for (let dx = -1; dx <= 1; dx++) {
+      const idx = pos + dx
+      if (idx >= 0 && idx < dim) {
+        windowSum += profile[idx]
+        windowCount++
+      }
+    }
+    total += windowCount === 0 ? 0 : windowSum / windowCount
+  }
+
+  return size <= 1 ? 0 : total / (size - 1)
+}
+
+/**
+ * Best-effort estimate of a square grid's cell count from its line pattern - tries every
+ * candidate size in range and picks the one whose hypothesized internal grid lines line up
+ * best with actual dark bands in the image. Not infallible; callers should let the user
+ * review/override the result.
+ *
+ * A genuine divisor of the true size (e.g. 5 when the real grid is 15) also scores well,
+ * since every one of its hypothesized lines does land on a real line - it just checks fewer
+ * of them. Among near-tied top scorers we therefore prefer the largest candidate, which is
+ * the more specific (and correct) hypothesis.
+ */
+export function estimateGridSize(buffer: PixelBuffer, minSize: number, maxSize: number): number {
+  const colProfile = axisDarknessProfile(buffer, 'col')
+  const rowProfile = axisDarknessProfile(buffer, 'row')
+
+  const scores = new Map<number, number>()
+  let maxScore = -Infinity
+
+  for (let size = minSize; size <= maxSize; size++) {
+    const score = scoreCandidateSize(colProfile, size) + scoreCandidateSize(rowProfile, size)
+    scores.set(size, score)
+    if (score > maxScore) maxScore = score
+  }
+
+  const tolerance = 0.95
+  let bestSize = minSize
+  for (let size = minSize; size <= maxSize; size++) {
+    const score = scores.get(size)!
+    if (score >= maxScore * tolerance) bestSize = size
+  }
+
+  return bestSize
+}

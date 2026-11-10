@@ -5,17 +5,6 @@
   text-align: center;
 }
 
-.back {
-  display: inline-block;
-  margin-bottom: 16px;
-  color: var(--text-muted);
-  text-decoration: none;
-}
-
-.back:hover {
-  color: var(--accent);
-}
-
 .hint {
   color: var(--text-muted);
   margin-bottom: 16px;

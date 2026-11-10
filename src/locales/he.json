@@ -1,0 +1,117 @@
+{
+  "app": {
+    "title": "חידות"
+  },
+  "common": {
+    "home": "בית",
+    "newPuzzle": "חידה חדשה",
+    "solve": "פתור",
+    "scanAPuzzle": "סרוק חידה",
+    "startOver": "התחל מחדש",
+    "tryAgain": "נסה שוב",
+    "scan": "סרוק",
+    "undoPoint": "בטל נקודה",
+    "newPhoto": "תמונה חדשה",
+    "choosePhoto": "בחר תמונה",
+    "backToGrid": "חזרה ללוח",
+    "continueToClues": "המשך לרמזים",
+    "check": "בדוק",
+    "playThisPuzzle": "שחק בחידה הזו",
+    "scanAnother": "סרוק עוד אחת",
+    "solvingWithAi": "פותר באמצעות AI…",
+    "gridSize": "גודל הלוח",
+    "cornersHint": "הקש על 4 הפינות של הלוח בסדר הזה: שמאל-עליון, ימין-עליון, ימין-תחתון, שמאל-תחתון. ({{count}}/4)",
+    "scanFailed": "הסריקה נכשלה: {{message}}",
+    "solvedStreak": "נפתרו: {{solved}} · רצף: {{streak}}",
+    "scanningProgress": "סורק תא {{current}} / {{total}}…",
+    "across": "מאוזן",
+    "down": "מאונך",
+    "solved": "נפתר!"
+  },
+  "home": {
+    "subtitle": "בחר חידה לשחק",
+    "solved": "נפתרו: {{count}}",
+    "modes": {
+      "wordScramble": { "title": "אותיות מעורבבות", "desc": "סדר מחדש את האותיות כדי למצוא את המילה" },
+      "sudoku": { "title": "סודוקו", "desc": "חידת היגיון קלאסית עם מספרים" },
+      "wordSearch": { "title": "תפזורת", "desc": "מצא מילים מוסתרות בלוח אותיות" },
+      "crossword": { "title": "תשבץ", "desc": "סרוק תשבץ (כל סגנון - רגיל, איטלקי, אתגר) ופתור את הרמזים עם AI" },
+      "arrowCrossword": { "title": "תשחץ", "desc": "סרוק תשבץ בסגנון סקנדינבי עם רמזים בתוך הלוח" },
+      "codeword": { "title": "תשבצופן", "desc": "סרוק תשבץ צופן (החלפת מספרים באותיות) ופתור אותו עם AI" }
+    }
+  },
+  "sudoku": {
+    "title": "סודוקו",
+    "difficulty": { "easy": "קל", "medium": "בינוני", "hard": "קשה" },
+    "status": { "solved": "נפתר!", "revealed": "הפתרון נחשף", "clues": "{{count}} רמזים" }
+  },
+  "wordScramble": {
+    "title": "אותיות מעורבבות",
+    "category": "קטגוריה: {{category}}",
+    "showHint": "הצג רמז",
+    "hideHint": "הסתר רמז",
+    "guessPlaceholder": "הניחוש שלך",
+    "nextWord": "מילה הבאה",
+    "feedback": {
+      "correct": "נכון!",
+      "incorrect": "לא בדיוק — נסה שוב.",
+      "revealed": "התשובה: {{word}}"
+    }
+  },
+  "wordSearch": {
+    "title": "תפזורת",
+    "categories": { "Animals": "חיות", "Space": "חלל", "Kitchen": "מטבח" },
+    "find": "מצא:",
+    "allFound": "כל המילים נמצאו!",
+    "foundCount": "{{found}} / {{total}} נמצאו"
+  },
+  "scanWordSearch": {
+    "title": "סרוק תפזורת",
+    "uploadHint": "צלם או העלה תמונה של לוח תפזורת.",
+    "reviewHint": "בדוק את האותיות הסרוקות ותקן טעויות.",
+    "solvedHint": "המילים שנמצאו מודגשות למטה.",
+    "wordsPlaceholder": "הכנס את המילים לחיפוש, אחת בכל שורה (או מופרדות בפסיקים)",
+    "foundHeading": "נמצאו ({{count}})",
+    "notFoundHeading": "לא נמצאו ({{count}})",
+    "notFoundHint": "מילים שלא נמצאו הן בדרך כלל סימן לאות שגויה — חזור ותקן את הלוח, ואז פתור שוב.",
+    "editLetters": "ערוך אותיות"
+  },
+  "scanSudoku": {
+    "title": "סרוק חידה",
+    "uploadHint": "צלם או העלה תמונה של לוח סודוקו.",
+    "reviewHint": "בדוק את הספרות הסרוקות ותקן טעויות לפני המשחק.",
+    "validation": {
+      "unsolvable": "זה לא נראה פתיר — בדוק את הספרות למעלה ונסה שוב.",
+      "multiple": "יש ליותר מפתרון חוקי אחד — ייתכן שספרה אחת לא זוהתה. אפשר עדיין לשחק.",
+      "unique": "נראה טוב — פתיר באופן ייחודי!"
+    }
+  },
+  "scanCrossword": {
+    "title": "סרוק תשבץ",
+    "uploadHint": "צלם או העלה תמונה של לוח תשבץ.",
+    "reviewHint": "הקש על כל תא כדי להחליף בין שחור ללבן, ואז המשך.",
+    "cluesHint": "הדבק או הקלד כל רמז אחרי מספרו, או סרוק תמונה של רשימת הרמזים המודפסת למטה. רמזי האורך (באורך) כבר ממולאים.",
+    "missingClues": "חסר טקסט רמז עבור: {{list}}",
+    "scanClueButton": "סרוק תמונת רמזים",
+    "scanningClues": "קורא רמזים…"
+  },
+  "scanArrowCrossword": {
+    "title": "סרוק תשחץ",
+    "uploadHint": "צלם או העלה תמונה של תשחץ בסגנון סקנדינבי.",
+    "reviewHint": "הקש על כל תא כדי להחליף בין תא רמז (מוצלל) לתא אות, ואז המשך.",
+    "cluesHint": "הקש על תא רמז מוצלל, ואז הקלד את הרמז המאוזן ו/או המאונך שלו.",
+    "acrossClueLabel": "רמז מאוזן (התשובה הולכת ימינה)",
+    "downClueLabel": "רמז מאונך (התשובה הולכת למטה)",
+    "missingClues": "ל-{{count}} תאי רמז עדיין חסר טקסט."
+  },
+  "scanCodeword": {
+    "title": "סרוק תשבצופן",
+    "uploadHint": "צלם או העלה תמונה של לוח תשבצופן.",
+    "reviewHint": "הקש על תא כדי לתקן מספר שגוי או להחליף בין שחור/לבן.",
+    "markWhite": "סמן כלבן",
+    "markBlack": "סמן כשחור",
+    "numberInCell": "המספר בתא הזה",
+    "continueToKnown": "המשך לאותיות ידועות",
+    "knownLettersHint": "אם בחידה יש אותיות פתיחה (למשל \"5 = ת\"), הכנס אותן כאן. השאר את השאר ריק."
+  }
+}

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import type { PuzzleMode } from '../../shared/progress/progressStore'
 import { getSummary } from '../../shared/progress/progressStore'
 import styles from './Home.module.css'
@@ -6,36 +7,45 @@ import styles from './Home.module.css'
 interface ModeInfo {
   mode: PuzzleMode
   path: string
-  title: string
-  desc: string
+  key: string
 }
 
 const MODES: ModeInfo[] = [
-  { mode: 'wordScramble', path: '/word-scramble', title: 'Word Scramble', desc: 'Unscramble the letters to find the word' },
-  { mode: 'sudoku', path: '/sudoku', title: 'Sudoku', desc: 'Classic number logic puzzle' },
-  { mode: 'wordSearch', path: '/word-search', title: 'Word Search', desc: 'Find hidden words in a grid of letters' },
+  { mode: 'wordScramble', path: '/word-scramble', key: 'wordScramble' },
+  { mode: 'sudoku', path: '/sudoku', key: 'sudoku' },
+  { mode: 'wordSearch', path: '/word-search', key: 'wordSearch' },
+]
+
+const SCAN_ONLY_MODES = [
+  { path: '/crossword/scan', key: 'crossword' },
+  { path: '/arrow-crossword/scan', key: 'arrowCrossword' },
+  { path: '/codeword/scan', key: 'codeword' },
 ]
 
 function Home() {
+  const { t } = useTranslation()
+
   return (
     <div className={styles.page}>
-      <h1>Puzzles</h1>
-      <p className={styles.subtitle}>Pick a puzzle to play</p>
+      <h1>{t('app.title')}</h1>
+      <p className={styles.subtitle}>{t('home.subtitle')}</p>
       <div className={styles.grid}>
         {MODES.map((m) => {
           const summary = getSummary(m.mode)
           return (
-            <Link key={m.mode} to={m.path} className={styles.card}>
-              <div className={styles.cardTitle}>{m.title}</div>
-              <div className={styles.cardDesc}>{m.desc}</div>
-              <div className={styles.cardStats}>Solved: {summary.completedCount}</div>
+            <Link key={m.key} to={m.path} className={styles.card}>
+              <div className={styles.cardTitle}>{t(`home.modes.${m.key}.title`)}</div>
+              <div className={styles.cardDesc}>{t(`home.modes.${m.key}.desc`)}</div>
+              <div className={styles.cardStats}>{t('home.solved', { count: summary.completedCount })}</div>
             </Link>
           )
         })}
-        <Link to="/crossword/scan" className={styles.card}>
-          <div className={styles.cardTitle}>Crossword</div>
-          <div className={styles.cardDesc}>Scan a crossword puzzle and solve the clues with AI</div>
-        </Link>
+        {SCAN_ONLY_MODES.map((m) => (
+          <Link key={m.key} to={m.path} className={styles.card}>
+            <div className={styles.cardTitle}>{t(`home.modes.${m.key}.title`)}</div>
+            <div className={styles.cardDesc}>{t(`home.modes.${m.key}.desc`)}</div>
+          </Link>
+        ))}
       </div>
     </div>
   )

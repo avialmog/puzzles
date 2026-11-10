@@ -1,9 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { createWorker } from 'tesseract.js'
 import { cellBounds, extractCell, inkRatio, warpToSquare, type Point } from '../../shared/imageProcessing/imageProcessing'
-import { imageDataToPixelBuffer } from '../../shared/imageProcessing/canvasHelpers'
+import { detectGridSizeFromCanvas, imageDataToPixelBuffer } from '../../shared/imageProcessing/canvasHelpers'
 import { deriveSlots } from '../../domain/crossword/numbering'
+import { sliceAnswer } from '../../domain/crossword/answer'
+import { parseClueListText } from '../../domain/crossword/clueListParser'
 import type { CrosswordSlot, SolveCrosswordRequest } from '../../domain/crossword/types'
+import BackLink from '../../shared/nav/BackLink'
 import scanStyles from '../../shared/scan/ScanUpload.module.css'
 import styles from './ScanCrossword.module.css'
 
@@ -39,17 +43,8 @@ function parseClues(text: string): Map<number, string> {
   return map
 }
 
-function sliceAnswer(grid: string[], slot: CrosswordSlot): string {
-  let answer = ''
-  for (let i = 0; i < slot.length; i++) {
-    const r = slot.direction === 'down' ? slot.row + i : slot.row
-    const c = slot.direction === 'across' ? slot.col + i : slot.col
-    answer += grid[r]?.[c] ?? '?'
-  }
-  return answer
-}
-
 function ScanCrossword() {
+  const { t } = useTranslation()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const imageRef = useRef<HTMLImageElement | null>(null)
 
@@ -62,6 +57,7 @@ function ScanCrossword() {
   const [downText, setDownText] = useState('')
   const [solvedGrid, setSolvedGrid] = useState<string[] | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [cluesScanning, setCluesScanning] = useState(false)
 
   const slots = useMemo(() => {
     if (!black) return []
@@ -135,7 +131,13 @@ function ScanCrossword() {
     const rect = canvas.getBoundingClientRect()
     const x = ((e.clientX - rect.left) / rect.width) * canvas.width
     const y = ((e.clientY - rect.top) / rect.height) * canvas.height
-    setCorners((prev) => [...prev, { x, y }])
+    const next = [...corners, { x, y }]
+    setCorners(next)
+
+    if (next.length === 4) {
+      const detected = detectGridSizeFromCanvas(canvas, next as [Point, Point, Point, Point], MIN_SIZE, MAX_SIZE)
+      if (detected) setGridSize(detected)
+    }
   }
 
   function handleUndoPoint() {
@@ -194,6 +196,36 @@ function ScanCrossword() {
     setStatus('clues')
   }
 
+  async function handleScanCluePhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setCluesScanning(true)
+    try {
+      const url = URL.createObjectURL(file)
+      const img = new Image()
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve()
+        img.onerror = () => reject(new Error('Failed to load image'))
+        img.src = url
+      })
+      URL.revokeObjectURL(url)
+
+      const worker = await createWorker('eng')
+      const result = await worker.recognize(img)
+      await worker.terminate()
+
+      const parsed = parseClueListText(result.data.text)
+      setAcrossText(parsed.across)
+      setDownText(parsed.down)
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : String(err))
+    } finally {
+      setCluesScanning(false)
+      e.target.value = ''
+    }
+  }
+
   const acrossClues = useMemo(() => parseClues(acrossText), [acrossText])
   const downClues = useMemo(() => parseClues(downText), [downText])
   const missingClues = useMemo(() => {
@@ -212,11 +244,16 @@ function ScanCrossword() {
     setErrorMessage(null)
 
     const request: SolveCrosswordRequest = {
+      mode: 'clues',
       rows: gridSize,
       cols: gridSize,
       black,
-      across: slots.filter((s) => s.direction === 'across').map((s) => ({ number: s.number, length: s.length, clue: acrossClues.get(s.number)! })),
-      down: slots.filter((s) => s.direction === 'down').map((s) => ({ number: s.number, length: s.length, clue: downClues.get(s.number)! })),
+      across: slots
+        .filter((s) => s.direction === 'across')
+        .map((s) => ({ number: s.number, length: s.length, clue: acrossClues.get(s.number)!, row: s.row, col: s.col })),
+      down: slots
+        .filter((s) => s.direction === 'down')
+        .map((s) => ({ number: s.number, length: s.length, clue: downClues.get(s.number)!, row: s.row, col: s.col })),
     }
 
     try {
@@ -246,16 +283,14 @@ function ScanCrossword() {
 
   return (
     <div className={scanStyles.page}>
-      <Link to="/" className={scanStyles.back}>
-        ← Home
-      </Link>
-      <h1>Scan a Crossword</h1>
+      <BackLink to="/" label={t('common.home')} />
+      <h1>{t('scanCrossword.title')}</h1>
 
       {status === 'upload' && (
         <>
-          <p className={scanStyles.hint}>Take or upload a photo of a crossword grid.</p>
+          <p className={scanStyles.hint}>{t('scanCrossword.uploadHint')}</p>
           <div className={styles.sizeRow}>
-            <label htmlFor="cwGridSize">Grid size</label>
+            <label htmlFor="cwGridSize">{t('common.gridSize')}</label>
             <input
               id="cwGridSize"
               type="number"
@@ -268,7 +303,7 @@ function ScanCrossword() {
             <span>x {gridSize}</span>
           </div>
           <label className={scanStyles.fileLabel}>
-            Choose photo
+            {t('common.choosePhoto')}
             <input type="file" accept="image/*" capture="environment" className={scanStyles.fileInput} onChange={handleFileChange} />
           </label>
         </>
@@ -276,22 +311,33 @@ function ScanCrossword() {
 
       {status === 'corners' && (
         <>
-          <p className={scanStyles.hint}>
-            Tap the 4 corners of the grid in order: top-left, top-right, bottom-right, bottom-left. ({corners.length}/4)
-          </p>
+          <p className={scanStyles.hint}>{t('common.cornersHint', { count: corners.length })}</p>
+          <div className={styles.sizeRow}>
+            <label htmlFor="cwGridSizeCorners">{t('common.gridSize')}</label>
+            <input
+              id="cwGridSizeCorners"
+              type="number"
+              min={MIN_SIZE}
+              max={MAX_SIZE}
+              className={styles.sizeInput}
+              value={gridSize}
+              onChange={(e) => setGridSize(Math.max(MIN_SIZE, Math.min(MAX_SIZE, Number(e.target.value) || DEFAULT_SIZE)))}
+            />
+            <span>x {gridSize}</span>
+          </div>
           <div className={scanStyles.canvasWrap}>
             <canvas ref={canvasRef} className={scanStyles.canvas} onClick={handleCanvasClick} />
           </div>
           <div className={scanStyles.toolbar}>
             <button type="button" className={scanStyles.button} onClick={handleUndoPoint} disabled={corners.length === 0}>
-              Undo point
+              {t('common.undoPoint')}
             </button>
             <label className={scanStyles.button}>
-              New photo
+              {t('common.newPhoto')}
               <input type="file" accept="image/*" capture="environment" className={scanStyles.fileInput} onChange={handleFileChange} />
             </label>
             <button type="button" className={`${scanStyles.button} ${scanStyles.primary}`} onClick={handleScan} disabled={corners.length !== 4}>
-              Scan
+              {t('common.scan')}
             </button>
           </div>
         </>
@@ -301,14 +347,14 @@ function ScanCrossword() {
         <>
           <p className={scanStyles.errorBox}>{errorMessage}</p>
           <button type="button" className={scanStyles.button} onClick={handleResetAll}>
-            Try again
+            {t('common.tryAgain')}
           </button>
         </>
       )}
 
       {status === 'review' && black && (
         <>
-          <p className={scanStyles.hint}>Tap any cell to toggle it between black and white, then continue.</p>
+          <p className={scanStyles.hint}>{t('scanCrossword.reviewHint')}</p>
           <div className={styles.cwGrid} style={{ gridTemplateColumns: `repeat(${gridSize}, 26px)` }}>
             {black.map((row, r) =>
               row.map((isBlack, c) => {
@@ -328,10 +374,10 @@ function ScanCrossword() {
           </div>
           <div className={scanStyles.toolbar}>
             <button type="button" className={scanStyles.button} onClick={handleResetAll}>
-              Start over
+              {t('common.startOver')}
             </button>
             <button type="button" className={`${scanStyles.button} ${scanStyles.primary}`} onClick={handleGoToClues}>
-              Continue to clues
+              {t('common.continueToClues')}
             </button>
           </div>
         </>
@@ -339,23 +385,34 @@ function ScanCrossword() {
 
       {status === 'clues' && (
         <>
-          <p className={scanStyles.hint}>Paste or type each clue after its number. The (length) hints are prefilled.</p>
+          <p className={scanStyles.hint}>{t('scanCrossword.cluesHint')}</p>
+          <label className={`${scanStyles.button} ${styles.scanCluesButton}`}>
+            {cluesScanning ? t('scanCrossword.scanningClues') : t('scanCrossword.scanClueButton')}
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className={scanStyles.fileInput}
+              onChange={handleScanCluePhoto}
+              disabled={cluesScanning}
+            />
+          </label>
           <div className={styles.clueColumns}>
             <div className={styles.clueColumn}>
-              <h3>Across</h3>
+              <h3>{t('common.across')}</h3>
               <textarea className={styles.cluesTextarea} value={acrossText} onChange={(e) => setAcrossText(e.target.value)} />
             </div>
             <div className={styles.clueColumn}>
-              <h3>Down</h3>
+              <h3>{t('common.down')}</h3>
               <textarea className={styles.cluesTextarea} value={downText} onChange={(e) => setDownText(e.target.value)} />
             </div>
           </div>
           {missingClues.length > 0 && (
-            <p className={styles.missingClues}>Missing clue text for: {missingClues.join(', ')}</p>
+            <p className={styles.missingClues}>{t('scanCrossword.missingClues', { list: missingClues.join(', ') })}</p>
           )}
           <div className={scanStyles.toolbar}>
             <button type="button" className={scanStyles.button} onClick={() => setStatus('review')}>
-              Back to grid
+              {t('common.backToGrid')}
             </button>
             <button
               type="button"
@@ -363,7 +420,7 @@ function ScanCrossword() {
               onClick={handleSolve}
               disabled={missingClues.length > 0}
             >
-              Solve
+              {t('common.solve')}
             </button>
           </div>
         </>
@@ -371,14 +428,14 @@ function ScanCrossword() {
 
       {status === 'solving' && (
         <>
-          <p className={scanStyles.hint}>Solving with AI…</p>
+          <p className={scanStyles.hint}>{t('common.solvingWithAi')}</p>
           <div className={styles.spinner} />
         </>
       )}
 
       {status === 'solved' && solvedGrid && black && (
         <>
-          <p className={scanStyles.hint}>Solved!</p>
+          <p className={scanStyles.hint}>{t('common.solved')}</p>
           <div className={styles.cwGrid} style={{ gridTemplateColumns: `repeat(${gridSize}, 26px)` }}>
             {black.map((row, r) =>
               row.map((isBlack, c) => (
@@ -390,7 +447,7 @@ function ScanCrossword() {
           </div>
           <div className={styles.answerList}>
             <div>
-              <h3>Across</h3>
+              <h3>{t('common.across')}</h3>
               <ul>
                 {slots
                   .filter((s) => s.direction === 'across')
@@ -402,7 +459,7 @@ function ScanCrossword() {
               </ul>
             </div>
             <div>
-              <h3>Down</h3>
+              <h3>{t('common.down')}</h3>
               <ul>
                 {slots
                   .filter((s) => s.direction === 'down')
@@ -416,7 +473,7 @@ function ScanCrossword() {
           </div>
           <div className={scanStyles.toolbar}>
             <button type="button" className={scanStyles.button} onClick={handleResetAll}>
-              Scan another
+              {t('common.scanAnother')}
             </button>
           </div>
         </>

@@ -1,10 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { createWorker, PSM } from 'tesseract.js'
 import { cellBounds, extractCell, warpToSquare, type Point } from '../../shared/imageProcessing/imageProcessing'
-import { imageDataToPixelBuffer, pixelBufferToCanvas, upscaleCanvas } from '../../shared/imageProcessing/canvasHelpers'
+import {
+  detectGridSizeFromCanvas,
+  imageDataToPixelBuffer,
+  pixelBufferToCanvas,
+  upscaleCanvas,
+} from '../../shared/imageProcessing/canvasHelpers'
 import { solveWordSearch, type SolveResult } from '../../domain/wordSearch/solve'
 import { wordCells } from '../../domain/wordSearch/types'
+import BackLink from '../../shared/nav/BackLink'
 import scanStyles from '../../shared/scan/ScanUpload.module.css'
 import styles from './ScanWordSearch.module.css'
 
@@ -33,6 +39,7 @@ function cellKey(r: number, c: number): string {
 }
 
 function ScanWordSearch() {
+  const { t } = useTranslation()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const imageRef = useRef<HTMLImageElement | null>(null)
 
@@ -113,7 +120,13 @@ function ScanWordSearch() {
     const rect = canvas.getBoundingClientRect()
     const x = ((e.clientX - rect.left) / rect.width) * canvas.width
     const y = ((e.clientY - rect.top) / rect.height) * canvas.height
-    setCorners((prev) => [...prev, { x, y }])
+    const next = [...corners, { x, y }]
+    setCorners(next)
+
+    if (next.length === 4) {
+      const detected = detectGridSizeFromCanvas(canvas, next as [Point, Point, Point, Point], MIN_SIZE, MAX_SIZE)
+      if (detected) setGridSize(detected)
+    }
   }
 
   function handleUndoPoint() {
@@ -200,16 +213,14 @@ function ScanWordSearch() {
 
   return (
     <div className={scanStyles.page}>
-      <Link to="/word-search" className={scanStyles.back}>
-        ← Word Search
-      </Link>
-      <h1>Scan a Word Search</h1>
+      <BackLink to="/word-search" label={t('wordSearch.title')} />
+      <h1>{t('scanWordSearch.title')}</h1>
 
       {status === 'upload' && (
         <>
-          <p className={scanStyles.hint}>Take or upload a photo of a word search grid.</p>
+          <p className={scanStyles.hint}>{t('scanWordSearch.uploadHint')}</p>
           <div className={styles.sizeRow}>
-            <label htmlFor="gridSize">Grid size</label>
+            <label htmlFor="gridSize">{t('common.gridSize')}</label>
             <input
               id="gridSize"
               type="number"
@@ -222,7 +233,7 @@ function ScanWordSearch() {
             <span>x {gridSize}</span>
           </div>
           <label className={scanStyles.fileLabel}>
-            Choose photo
+            {t('common.choosePhoto')}
             <input
               type="file"
               accept="image/*"
@@ -236,18 +247,31 @@ function ScanWordSearch() {
 
       {(status === 'corners' || status === 'scanning') && (
         <>
-          <p className={scanStyles.hint}>
-            Tap the 4 corners of the grid in order: top-left, top-right, bottom-right, bottom-left. ({corners.length}/4)
-          </p>
+          <p className={scanStyles.hint}>{t('common.cornersHint', { count: corners.length })}</p>
+          {status === 'corners' && (
+            <div className={styles.sizeRow}>
+              <label htmlFor="gridSizeCorners">{t('common.gridSize')}</label>
+              <input
+                id="gridSizeCorners"
+                type="number"
+                min={MIN_SIZE}
+                max={MAX_SIZE}
+                className={styles.sizeInput}
+                value={gridSize}
+                onChange={(e) => setGridSize(Math.max(MIN_SIZE, Math.min(MAX_SIZE, Number(e.target.value) || DEFAULT_SIZE)))}
+              />
+              <span>x {gridSize}</span>
+            </div>
+          )}
           <div className={scanStyles.canvasWrap}>
             <canvas ref={canvasRef} className={scanStyles.canvas} onClick={handleCanvasClick} />
           </div>
           <div className={scanStyles.toolbar}>
             <button type="button" className={scanStyles.button} onClick={handleUndoPoint} disabled={corners.length === 0 || status === 'scanning'}>
-              Undo point
+              {t('common.undoPoint')}
             </button>
             <label className={scanStyles.button}>
-              New photo
+              {t('common.newPhoto')}
               <input type="file" accept="image/*" capture="environment" className={scanStyles.fileInput} onChange={handleFileChange} />
             </label>
             <button
@@ -256,14 +280,14 @@ function ScanWordSearch() {
               onClick={handleScan}
               disabled={corners.length !== 4 || status === 'scanning'}
             >
-              Scan
+              {t('common.scan')}
             </button>
           </div>
 
           {status === 'scanning' && (
             <>
               <p className={scanStyles.progressLabel}>
-                Scanning cell {progress} / {gridSize * gridSize}…
+                {t('common.scanningProgress', { current: progress, total: gridSize * gridSize })}
               </p>
               <div className={scanStyles.progressBarTrack}>
                 <div className={scanStyles.progressBarFill} style={{ width: `${(progress / (gridSize * gridSize)) * 100}%` }} />
@@ -275,9 +299,9 @@ function ScanWordSearch() {
 
       {status === 'error' && (
         <>
-          <p className={scanStyles.errorBox}>Scan failed: {errorMessage}</p>
+          <p className={scanStyles.errorBox}>{t('common.scanFailed', { message: errorMessage })}</p>
           <button type="button" className={scanStyles.button} onClick={handleResetAll}>
-            Try again
+            {t('common.tryAgain')}
           </button>
         </>
       )}
@@ -285,7 +309,7 @@ function ScanWordSearch() {
       {(status === 'review' || status === 'solved') && letters && (
         <>
           <p className={scanStyles.hint}>
-            {status === 'review' ? 'Check the scanned letters and fix any mistakes.' : 'Found words are highlighted below.'}
+            {status === 'review' ? t('scanWordSearch.reviewHint') : t('scanWordSearch.solvedHint')}
           </p>
 
           <div className={styles.letterGrid} style={{ gridTemplateColumns: `repeat(${gridSize}, 28px)` }}>
@@ -317,13 +341,13 @@ function ScanWordSearch() {
             <>
               <textarea
                 className={styles.wordsTextarea}
-                placeholder="Enter the words to find, one per line (or comma-separated)"
+                placeholder={t('scanWordSearch.wordsPlaceholder')}
                 value={wordsText}
                 onChange={(e) => setWordsText(e.target.value)}
               />
               <div className={scanStyles.toolbar}>
                 <button type="button" className={scanStyles.button} onClick={handleResetAll}>
-                  Start over
+                  {t('common.startOver')}
                 </button>
                 <button
                   type="button"
@@ -331,7 +355,7 @@ function ScanWordSearch() {
                   onClick={handleSolve}
                   disabled={parseWords(wordsText).length === 0}
                 >
-                  Solve
+                  {t('common.solve')}
                 </button>
               </div>
             </>
@@ -341,7 +365,7 @@ function ScanWordSearch() {
             <>
               <div className={styles.resultsLayout}>
                 <div className={styles.wordList}>
-                  <h3>Found ({solveResult.found.length})</h3>
+                  <h3>{t('scanWordSearch.foundHeading', { count: solveResult.found.length })}</h3>
                   <ul>
                     {solveResult.found.map((p) => (
                       <li key={p.word} className={styles.found}>
@@ -351,7 +375,7 @@ function ScanWordSearch() {
                   </ul>
                   {solveResult.notFound.length > 0 && (
                     <>
-                      <h3>Not found ({solveResult.notFound.length})</h3>
+                      <h3>{t('scanWordSearch.notFoundHeading', { count: solveResult.notFound.length })}</h3>
                       <ul>
                         {solveResult.notFound.map((w) => (
                           <li key={w} className={styles.notFound}>
@@ -363,17 +387,13 @@ function ScanWordSearch() {
                   )}
                 </div>
               </div>
-              {solveResult.notFound.length > 0 && (
-                <p className={scanStyles.hint}>
-                  Not-found words usually mean a misread letter — go back and fix the grid, then solve again.
-                </p>
-              )}
+              {solveResult.notFound.length > 0 && <p className={scanStyles.hint}>{t('scanWordSearch.notFoundHint')}</p>}
               <div className={scanStyles.toolbar}>
                 <button type="button" className={scanStyles.button} onClick={() => setStatus('review')}>
-                  Edit letters
+                  {t('scanWordSearch.editLetters')}
                 </button>
                 <button type="button" className={scanStyles.button} onClick={handleResetAll}>
-                  Start over
+                  {t('common.startOver')}
                 </button>
               </div>
             </>

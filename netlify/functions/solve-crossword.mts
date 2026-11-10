@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { buildCrosswordPrompt } from '../../src/domain/crossword/promptBuilder'
+import { buildCipherPrompt, buildCrosswordPrompt } from '../../src/domain/crossword/promptBuilder'
 import type { SolveCrosswordRequest, SolveCrosswordResponse } from '../../src/domain/crossword/types'
 
 const MODEL = 'claude-sonnet-5'
@@ -7,13 +7,11 @@ const MODEL = 'claude-sonnet-5'
 function isValidRequest(body: unknown): body is SolveCrosswordRequest {
   if (!body || typeof body !== 'object') return false
   const b = body as Record<string, unknown>
-  return (
-    typeof b.rows === 'number' &&
-    typeof b.cols === 'number' &&
-    Array.isArray(b.black) &&
-    Array.isArray(b.across) &&
-    Array.isArray(b.down)
-  )
+  if (typeof b.rows !== 'number' || typeof b.cols !== 'number' || !Array.isArray(b.black)) return false
+
+  if (b.mode === 'clues') return Array.isArray(b.across) && Array.isArray(b.down)
+  if (b.mode === 'cipher') return Array.isArray(b.numbers) && typeof b.knownLetters === 'object' && b.knownLetters !== null
+  return false
 }
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -35,7 +33,7 @@ export default async (req: Request): Promise<Response> => {
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) return jsonResponse({ error: 'Server is missing ANTHROPIC_API_KEY' }, 500)
 
-  const prompt = buildCrosswordPrompt(body)
+  const prompt = body.mode === 'cipher' ? buildCipherPrompt(body) : buildCrosswordPrompt(body)
 
   const tool = {
     name: 'submit_crossword_solution',
