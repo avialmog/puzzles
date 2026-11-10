@@ -32,6 +32,10 @@ function Home() {
             </Link>
           )
         })}
+        <Link to="/crossword/scan" className={styles.card}>
+          <div className={styles.cardTitle}>Crossword</div>
+          <div className={styles.cardDesc}>Scan a crossword puzzle and solve the clues with AI</div>
+        </Link>
       </div>
     </div>
   )
