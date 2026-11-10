@@ -1,6 +1,7 @@
 import { HashRouter, Route, Routes } from 'react-router-dom'
 import Home from './pages/Home/Home'
 import ScanSudoku from './pages/ScanSudoku/ScanSudoku'
+import ScanWordSearch from './pages/ScanWordSearch/ScanWordSearch'
 import Sudoku from './pages/Sudoku/Sudoku'
 import WordScramble from './pages/WordScramble/WordScramble'
 import WordSearch from './pages/WordSearch/WordSearch'
@@ -14,6 +15,7 @@ function App() {
         <Route path="/sudoku" element={<Sudoku />} />
         <Route path="/sudoku/scan" element={<ScanSudoku />} />
         <Route path="/word-search" element={<WordSearch />} />
+        <Route path="/word-search/scan" element={<ScanWordSearch />} />
       </Routes>
     </HashRouter>
   )

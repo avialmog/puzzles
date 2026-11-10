@@ -169,6 +169,9 @@ function WordSearch() {
       <button type="button" className={styles.newButton} onClick={handleSolve} disabled={won}>
         Solve
       </button>
+      <Link to="/word-search/scan" className={styles.newButton}>
+        Scan a puzzle
+      </Link>
 
       <p className={styles.stats}>
         Solved: {summary.completedCount} · Streak: {summary.currentStreak}

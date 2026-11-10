@@ -6,14 +6,14 @@ import {
   extractCell,
   inkRatio,
   warpToSquare,
-  type PixelBuffer,
   type Point,
-} from '../../domain/sudoku/imageProcessing'
+} from '../../shared/imageProcessing/imageProcessing'
+import { imageDataToPixelBuffer, pixelBufferToCanvas, upscaleCanvas } from '../../shared/imageProcessing/canvasHelpers'
 import { countSolutions, solveOne } from '../../domain/sudoku/solver'
 import type { Grid, Puzzle } from '../../domain/sudoku/types'
 import { emptyGrid } from '../../domain/sudoku/types'
 import sudokuStyles from '../Sudoku/Sudoku.module.css'
-import styles from './ScanSudoku.module.css'
+import styles from '../../shared/scan/ScanUpload.module.css'
 
 const MAX_DISPLAY_WIDTH = 420
 const WARP_SIZE = 450
@@ -22,29 +22,6 @@ const INK_THRESHOLD = 0.025
 
 type Status = 'upload' | 'corners' | 'scanning' | 'review' | 'error'
 type Validation = { kind: 'none' } | { kind: 'unsolvable' } | { kind: 'multiple'; puzzle: Puzzle } | { kind: 'unique'; puzzle: Puzzle }
-
-function imageDataToPixelBuffer(imageData: ImageData): PixelBuffer {
-  return { width: imageData.width, height: imageData.height, data: imageData.data }
-}
-
-function pixelBufferToCanvas(buffer: PixelBuffer): HTMLCanvasElement {
-  const canvas = document.createElement('canvas')
-  canvas.width = buffer.width
-  canvas.height = buffer.height
-  const ctx = canvas.getContext('2d')!
-  ctx.putImageData(new ImageData(new Uint8ClampedArray(buffer.data), buffer.width, buffer.height), 0, 0)
-  return canvas
-}
-
-function upscaleCanvas(source: HTMLCanvasElement, factor: number): HTMLCanvasElement {
-  const canvas = document.createElement('canvas')
-  canvas.width = source.width * factor
-  canvas.height = source.height * factor
-  const ctx = canvas.getContext('2d')!
-  ctx.imageSmoothingEnabled = true
-  ctx.drawImage(source, 0, 0, canvas.width, canvas.height)
-  return canvas
-}
 
 function parseDigit(text: string): number {
   const match = text.match(/[1-9]/)
