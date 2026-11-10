@@ -1,0 +1,133 @@
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px 16px 120px;
+  text-align: center;
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 16px;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.back:hover {
+  color: var(--accent);
+}
+
+.toolbar {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.catButton {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.catButton.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.layout {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.grid {
+  display: grid;
+  gap: 0;
+  user-select: none;
+  touch-action: none;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.cell.selected {
+  background: var(--accent-bg, rgba(106, 59, 255, 0.2));
+}
+
+.cell.found {
+  background: #1a9d4a;
+  color: #fff;
+}
+
+.wordList {
+  min-width: 160px;
+  text-align: left;
+}
+
+.wordList h3 {
+  margin-bottom: 8px;
+}
+
+.wordList ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.wordList li {
+  padding: 4px 0;
+  color: var(--text-muted);
+}
+
+.wordList li.found {
+  color: var(--text);
+  text-decoration: line-through;
+}
+
+.status {
+  margin-top: 16px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.status.won {
+  color: #1a9d4a;
+}
+
+.newButton {
+  margin-top: 16px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.newButton:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.stats {
+  margin-top: 16px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
