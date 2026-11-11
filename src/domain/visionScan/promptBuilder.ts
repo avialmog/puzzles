@@ -1,9 +1,10 @@
+import type Anthropic from '@anthropic-ai/sdk'
 import type { PuzzleType } from './types'
 
 export interface ToolSpec {
   name: string
   description: string
-  input_schema: Record<string, unknown>
+  input_schema: Anthropic.Tool.InputSchema
 }
 
 export interface VisionPrompt {
